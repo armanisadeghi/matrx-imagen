@@ -1,0 +1,110 @@
+version: "3.8"
+
+services:
+  comfyui:
+    platform: linux/amd64
+    build:
+      context: ./build
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.10}
+        PYTORCH_VERSION: ${PYTORCH_VERSION:-2.3.0}
+        COMFYUI_BUILD_REF: ${COMFYUI_BUILD_REF:-}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/python:${PYTHON_VERSION}-v2-cuda-12.1.1-base-22.04}
+      tags:
+        - "ghcr.io/ai-dock/comfyui:${IMAGE_TAG:-pytorch-${PYTORCH_VERSION}-py3.10-v2-cuda-12.1.1-base-22.04}"
+        
+    image: ghcr.io/ai-dock/comfyui:${IMAGE_TAG:-pytorch-${PYTORCH_VERSION}-py3.10-v2-cuda-12.1.1-base-22.04}
+    
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    
+    devices:
+      - "/dev/dri:/dev/dri"
+    
+    volumes:
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
+      - ./build/COPY_ROOT_1/opt/ai-dock/api-wrapper:/opt/ai-dock/api-wrapper
+      
+    ports:
+      - 2223:22  # Avoiding conflict on port 2222
+      - 1111:1111  # ComfyUI service portal
+      - ${COMFYUI_PORT_HOST:-8188}:${COMFYUI_PORT_HOST:-8188}
+      - ${JUPYTER_PORT_HOST:-8888}:${JUPYTER_PORT_HOST:-8888}
+      - 8385:8384  # Syncthing UI for comfyui
+      - 22998:22999  # Syncthing Transport for comfyui
+    
+    environment:
+      - AUTO_UPDATE=${AUTO_UPDATE:-false}
+      - DIRECT_ADDRESS=${DIRECT_ADDRESS:-127.0.0.1}
+      - WORKSPACE=${WORKSPACE:-/workspace}
+      - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+      - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+      - CIVITAI_TOKEN=${CIVITAI_TOKEN:-}
+      - HF_TOKEN=${HF_TOKEN:-}
+      - WEB_USER=user
+      - WEB_PASSWORD=pass
+      - SSH_PORT_HOST=2223
+      - COMFYUI_PORT_HOST=${COMFYUI_PORT_HOST:-8188}
+      - JUPYTER_PORT_HOST=${JUPYTER_PORT_HOST:-8888}
+      - SERVERLESS=${SERVERLESS:-false}
+      - PROVISIONING_SCRIPT=/opt/ai-dock/bin/provisioning.sh
+
+  invokeai:
+    platform: linux/amd64
+    build:
+      context: ./build
+      args:
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.10}
+        PYTORCH_VERSION: ${PYTORCH_VERSION:-2.2.2}
+        INVOKEAI_VERSION: ${INVOKEAI_VERSION:-4.2.4}
+        IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/python:3.10-v2-cuda-11.8.0-base-22.04}
+      tags:
+        - "ghcr.io/ai-dock/invokeai:${IMAGE_TAG:-v2-cuda-11.8.0-base-22.04}"
+    
+    image: ghcr.io/ai-dock/invokeai:${IMAGE_TAG:-v2-cuda-11.8.0-base-22.04}
+    
+    devices:
+      - "/dev/dri:/dev/dri"
+    
+    volumes:
+      - ./workspace:${WORKSPACE:-/workspace/}:rshared
+      - ./config/authorized_keys:/root/.ssh/authorized_keys_mount
+      - ./config/provisioning/default.sh:/opt/ai-dock/bin/provisioning.sh
+    
+    ports:
+      - 2224:22  # Avoiding conflict on port 2222
+      - 1113:1111  # InvokeAI service portal (changed to avoid conflict with ComfyUI)
+      - ${INVOKEAI_PORT_HOST:-9090}:${INVOKEAI_PORT_HOST:-9090}
+      - 8889:8888  # Jupyter for InvokeAI on a different port
+      - 8386:8384  # Syncthing UI for invokeai
+      - 22997:22999  # Syncthing Transport for invokeai
+    
+    environment:
+      - DIRECT_ADDRESS=${DIRECT_ADDRESS:-127.0.0.1}
+      - WORKSPACE=${WORKSPACE:-/workspace}
+      - CF_TUNNEL_TOKEN=${CF_TUNNEL_TOKEN:-}
+      - CF_QUICK_TUNNELS=${CF_QUICK_TUNNELS:-true}
+      - HF_TOKEN=${HF_TOKEN:-}
+      - WEB_USER=user
+      - WEB_PASSWORD=pass
+      - SSH_PORT_HOST=2224
+      - INVOKEAI_PORT_HOST=${INVOKEAI_PORT_HOST:-9090}
+      - JUPYTER_PORT_HOST=8889
+      - SERVERLESS=${SERVERLESS:-false}
+      - PROVISIONING_SCRIPT=/opt/ai-dock/bin/provisioning.sh
+
+  # New service: Caddy reverse proxy for a unified access point
+  caddy:
+    image: caddy:latest
+    ports:
+      - "1114:80"  # Third UI portal on port 1114
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+    environment:
+      - CADDY_PATH=/etc/caddy
