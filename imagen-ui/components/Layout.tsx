@@ -84,7 +84,7 @@ export function Layout({ children }: LayoutProps) {
                   className="overflow-hidden rounded-full"
                 >
                   <Image
-                    src="/placeholder-user.jpg"
+                    src="/placeholder-user.webp"
                     width={36}
                     height={36}
                     alt="Avatar"

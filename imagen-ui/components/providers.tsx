@@ -1,5 +1,8 @@
+// components\providers.tsx
+
 import React from 'react';
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from './components/theme-provider';
 
 interface ProvidersProps {
   children: React.ReactNode;
@@ -7,8 +10,15 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <TooltipProvider>
-      {children}
-    </TooltipProvider>
+    <ThemeProvider
+    attribute="class"
+    defaultTheme="system"
+    enableSystem
+    disableTransitionOnChange
+  >
+<TooltipProvider>
+        {children}
+      </TooltipProvider>
+    </ThemeProvider>
   );
 }
