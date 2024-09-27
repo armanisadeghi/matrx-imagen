@@ -1,0 +1,16 @@
+:80 {
+    # Set default credentials for accessing the combined UI
+    basicauth / {
+        user $2y$10$3F/cD72BAyniX9QEmMvQduBu7GP5O0u/RDmIs36xbueRsCzPxiYAa  # Hashed password for 'pass'
+    }
+
+    # Proxy ComfyUI on /comfyui
+    handle_path /comfyui* {
+        reverse_proxy localhost:1111
+    }
+
+    # Proxy InvokeAI on /invokeai
+    handle_path /invokeai* {
+        reverse_proxy localhost:1113
+    }
+}
