@@ -1,14 +1,28 @@
-import { Layout } from '@/components/Layout'
-import '../styles/globals.css'
-import type { AppProps } from 'next/app'
+// imagen-ui/pages/_app.tsx
 
+import { Layout } from '@/components/Layout';
+import '@/styles/globals.css';
+import type { AppProps } from 'next/app';
+import type { NextPage } from 'next';
+import type { ReactElement, ReactNode } from 'react';
+import { Providers } from '@/components/providers';
 
-function MyApp({ Component, pageProps }: AppProps) {
+type NextPageWithLayout = NextPage & {
+  getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+  Component: NextPageWithLayout;
+};
+
+function MyApp({ Component, pageProps }: AppPropsWithLayout) {
+  const getLayout = Component.getLayout ?? ((page) => <Layout>{page}</Layout>);
+
   return (
-    <Layout>
-      <Component {...pageProps} />
-    </Layout>
-  )
+    <Providers>
+      {getLayout(<Component {...pageProps} />)}
+    </Providers>
+  );
 }
 
-export default MyApp
+export default MyApp;
