@@ -1,4 +1,5 @@
 import os
+import shutil
 from IPython.display import clear_output
 from subprocess import call
 
@@ -129,6 +130,22 @@ def download_inpaint():
     ]
     download_files(models, '/workspace/ComfyUI/models/inpaint/')
 
+def copy_notebook():
+    # Define source and destination paths
+    source_notebook = 'utils/ComfyUI.ipynb'
+    destination_directory = '/workspace/ComfyUI/notebooks'
+    destination_notebook = os.path.join(destination_directory, 'ComfyUI.ipynb')
+    
+    # Create the notebooks directory if it doesn't exist
+    os.makedirs(destination_directory, exist_ok=True)
+    
+    # Copy the notebook
+    if os.path.exists(source_notebook):
+        shutil.copy(source_notebook, destination_notebook)
+        print(f"Copied {source_notebook} to {destination_notebook}")
+    else:
+        print(f"Notebook {source_notebook} not found!")
+
 
 if __name__ == "__main__":
     deps()
@@ -138,3 +155,4 @@ if __name__ == "__main__":
     download_inpaint()
     download_controlnet()
     sd()
+    copy_notebook()
