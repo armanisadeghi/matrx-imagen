@@ -1,15 +1,18 @@
 #!/bin/bash
 
 # Ensure necessary scripts are executable
-chmod +x resources/utils/update_system.sh
-chmod +x resources/utils/print_service_info.sh
+chmod +x utils/update_system.sh
+chmod +x utils/gpu_check.sh
+chmod +x utils/print_service_info.sh
 chmod +x test_logo.sh
 
-# Display AI Matrx logo
-cat resources/utils/ai_matrx_logo.txt
+cat utils/ai_matrx_logo.txt
 
 # Update the system: Apt, Python, Conda, and Docker.
-resources/utils/update_system.sh
+utils/update_system.sh
+
+# Check if GPUs are available and how many are present
+utils/gpu_check.sh
 
 # Get the public IP address
 get_public_ip() {

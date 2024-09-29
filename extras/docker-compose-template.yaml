@@ -1,0 +1,77 @@
+services:
+  your-service:
+    container_name: custom-container-name  # Custom container name
+    image: your-image:latest  # Use a prebuilt image
+    build:
+      context: ./your-service-directory  # Build from source
+      dockerfile: Dockerfile  # Specify Dockerfile
+      args:  # Build arguments
+        ARG_NAME: value
+    environment:
+      - ENV_VAR1=value1
+      - ENV_VAR2=value2  # Set environment variables
+    ports:
+      - "8080:80"  # Map host port 8080 to container port 80
+    volumes:
+      - ./host-data:/container-data  # Bind mount a volume
+    networks:
+      - custom-network  # Attach the service to a custom network
+    command: ["python", "app.py"]  # Override the default command
+    depends_on:
+      - database  # Dependencies on other services
+    restart: always  # Restart policy
+    secrets:
+      - db_password  # Use a secret
+    healthcheck:  # Define a health check
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:  # Log configuration
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    extra_hosts:  # Add host mappings
+      - "my-host:127.0.0.1"
+    labels:
+      com.example.description: "This is my service"  # Add labels for metadata
+    dns:
+      - 8.8.8.8  # Custom DNS server
+    dns_search:
+      - example.com  # DNS search domain
+    volumes_from:  # Use volumes from another container
+      - other-service
+    security_opt:
+      - no-new-privileges  # Additional security options
+    sysctls:
+      net.ipv4.ip_forward: 1  # Set kernel parameters
+
+    deploy:  # Options for Docker Swarm
+      mode: replicated  # Define the mode (replicated or global)
+      replicas: 3  # Number of replicas
+      resources:  # Resource reservations
+        limits:
+          cpus: "0.5"
+          memory: "512M"
+        reservations:
+          cpus: "0.25"
+          memory: "256M"
+          devices:
+            - capabilities: [gpu]  # Enable GPU access
+      restart_policy:
+        condition: on-failure  # Restart policy (on-failure, always, etc.)
+        delay: 5s
+        max_attempts: 3
+      placement:
+        constraints: [node.role == manager]  # Specify placement constraints
+      update_config:
+        parallelism: 2
+        delay: 10s
+        failure_action: rollback  # Configure rolling updates
+      rollback_config:
+        parallelism: 1
+        delay: 5s
+      labels:
+        com.example.deploy: "production"  # Metadata for deployment
+      endpoint_mode: vip  # Service discovery mode (vip or dnsrr)
