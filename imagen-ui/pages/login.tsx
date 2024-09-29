@@ -1,5 +1,7 @@
+// imagen-ui/pages/login.tsx
+
 import React from 'react';
-import { LoginComponent } from '@/components/login'; // Adjust the import path as needed
+import { LoginComponent } from '@/components/login';
 import type { NextPage } from 'next';
 import type { ReactElement, ReactNode } from 'react';
 

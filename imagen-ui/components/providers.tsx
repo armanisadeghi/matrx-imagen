@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { ThemeProvider } from './components/theme-provider';
+import { ThemeProvider } from './theme-provider';
 
 interface ProvidersProps {
   children: React.ReactNode;
