@@ -4,7 +4,7 @@ services:
     build:
       context: ./build
       args:
-        PYTHON_VERSION: ${PYTHON_VERSION:-3.10}
+        PYTHON_VERSION: ${PYTHON_VERSION:-3.11}
         PYTORCH_VERSION: ${PYTORCH_VERSION:-2.3.0}
         COMFYUI_BUILD_REF: ${COMFYUI_BUILD_REF:-}
         IMAGE_BASE: ${IMAGE_BASE:-ghcr.io/ai-dock/python:${PYTHON_VERSION}-v2-cuda-12.1.1-base-22.04}
@@ -16,7 +16,7 @@ services:
         reservations:
           devices:
             - driver: nvidia
-              count: ${GPU_COUNT:-0}
+              count: ${GPU_COUNT:-1}
               capabilities: [gpu]
 
     devices:
