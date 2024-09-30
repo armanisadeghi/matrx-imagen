@@ -1,0 +1,141 @@
+services:
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend
+    ports:
+      - "20049:3000"
+    volumes:
+      - /workspace/frontend:/app
+    networks:
+      - app-network
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  vscode-server:
+    build:
+      context: ./services/vscode-server
+      dockerfile: Dockerfile
+    container_name: vscode-server
+    ports:
+      - "20047:8080"
+    volumes:
+      - /workspace:/workspace
+    networks:
+      - app-network
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  jupyterlab-superadmin:
+    build:
+      context: ./services/jupyterlab-superadmin
+      dockerfile: Dockerfile
+    container_name: jupyterlab-superadmin
+    ports:
+      - "20029:8888"
+    volumes:
+      - /workspace:/workspace
+    networks:
+      - app-network
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  jupyterlab:
+    build:
+      context: ./services/jupyterlab
+      dockerfile: Dockerfile
+    container_name: jupyterlab
+    ports:
+      - "20051:9000"
+    volumes:
+      - /workspace/limited:/workspace
+    networks:
+      - app-network
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  comfyui:
+    build:
+      context: ./services/comfyui
+      dockerfile: Dockerfile
+    container_name: comfyui
+    ports:
+      - "20035:1111"
+    volumes:
+      - /workspace/comfyui:/app
+    networks:
+      - app-network
+
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  invokeai:
+    build:
+      context: ./services/invokeai
+      dockerfile: Dockerfile
+    container_name: invokeai
+    ports:
+      - "20030:9090"
+    volumes:
+      - /workspace/invokeai:/app
+    networks:
+      - app-network
+    device_requests:
+      - driver: nvidia
+        count: all
+        capabilities: [gpu]
+    env_file:
+      - .env
+
+  supabase:
+    image: supabase/supabase-local:latest
+    container_name: supabase
+    ports:
+      - "54322:5432"  # Postgres
+      - "54323:8080"  # API Gateway
+    volumes:
+      - /workspace/supabase:/var/lib/postgresql/data
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+  service-manager:
+    build:
+      context: ./services/service-manager
+      dockerfile: Dockerfile
+    container_name: service-manager
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /workspace:/workspace
+    networks:
+      - app-network
+    env_file:
+      - .env
+
+
+networks:
+  app-network:
+    driver: bridge
